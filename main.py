@@ -124,7 +124,7 @@ def users(bucketname, bucket, endpoint, dbConn):
   dbConn: open connection to MySQL server
   """
   sql = """
-  select * from users;
+  select * from users order by userid desc;
   """
   row = datatier.retrieve_all_rows(dbConn, sql)
   if row is None:
@@ -136,7 +136,31 @@ def users(bucketname, bucket, endpoint, dbConn):
     for i in range(count):
       #print(row[i])
       print(f"User id: {row[i][0]}\n Email: {row[i][1]}\n Name: {row[i][2]}\n Folder:{row[i][3]}")
-  
+#########################################################################
+# Assets
+# 
+def assets(bucketname, bucket, endpoint, dbConn):
+  """
+  Parameters
+  ----------
+  bucketname: S3 bucket name,
+  bucket: S3 boto bucket object,
+  endpoint: RDS machine name,
+  dbConn: open connection to MySQL server
+  """
+  sql = """
+  select * from assets order by assetid desc;
+  """
+  row = datatier.retrieve_all_rows(dbConn, sql)
+  if row is None:
+    print("Database operation failed...")
+  elif row == ():
+    print("Unexpected query failure...")
+  else:
+    count=len(row)
+    for i in range(count):
+      #print(row[i])
+      print(f"Asset id: {row[i][0]}\n User id: {row[i][1]}\n Original Name: {row[i][2]}\n Key Name:{row[i][3]}")
 #########################################################################
 # main
 #
@@ -215,6 +239,9 @@ while cmd != 0:
   #
   elif cmd == 2:
     users(bucketname, bucket, endpoint, dbConn)
+
+  elif cmd == 2:
+    assets(bucketname, bucket, endpoint, dbConn)
 
   else:
     print("** Unknown command, try again...")
