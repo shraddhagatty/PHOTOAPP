@@ -161,6 +161,35 @@ def assets(bucketname, bucket, endpoint, dbConn):
     for i in range(count):
       #print(row[i])
       print(f"Asset id: {row[i][0]}\n User id: {row[i][1]}\n Original Name: {row[i][2]}\n Key Name:{row[i][3]}")
+
+#########################################################################
+#Download
+def download(bucketname, bucket, endpoint, dbConn):
+  """
+  Parameters
+  ----------
+  bucketname: S3 bucket name,
+  bucket: S3 boto bucket object,
+  endpoint: RDS machine name,
+  dbConn: open connection to MySQL server
+  """
+  a = input("Enter asset id\n")
+  sql = f"""
+  select assetname,bucketkey,bucketfolder from assets 
+  inner join users where assets.userid = users.userid and  assetid = {a};
+  """
+  row = datatier.retrieve_all_rows(dbConn, sql)
+  if row is None:
+    print("Database operation failed...")
+  elif row == ():
+    print("Unexpected query failure...")
+  else:
+    #print(row)
+    bname = awsutil.download_file(bucket, row[0][1])
+    os.rename(bname, row[0][0])
+    print(f"Downloaded from S3 and saved as '{row[0][0]}'")
+
+
 #########################################################################
 # main
 #
@@ -240,8 +269,11 @@ while cmd != 0:
   elif cmd == 2:
     users(bucketname, bucket, endpoint, dbConn)
 
-  elif cmd == 2:
+  elif cmd == 3:
     assets(bucketname, bucket, endpoint, dbConn)
+
+  elif cmd == 4:
+    download(bucketname, bucket, endpoint, dbConn)
 
   else:
     print("** Unknown command, try again...")
