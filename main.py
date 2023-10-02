@@ -91,17 +91,26 @@ def stats(bucketname, bucket, endpoint, dbConn):
   print("RDS MySQL endpoint:", endpoint)
 
   sql = """
-  select now();
+  select count(*) from users;
   """
-
   row = datatier.retrieve_one_row(dbConn, sql)
   if row is None:
     print("Database operation failed...")
   elif row == ():
     print("Unexpected query failure...")
   else:
-    print(row[0])
+    print("# of users",row[0])
 
+  sql = """
+  select count(*) from assets;
+  """
+  row = datatier.retrieve_one_row(dbConn, sql)
+  if row is None:
+    print("Database operation failed...")
+  elif row == ():
+    print("Unexpected query failure...")
+  else:
+    print("# of assets",row[0])
 
 #########################################################################
 # main
