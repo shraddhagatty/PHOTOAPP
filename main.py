@@ -113,6 +113,31 @@ def stats(bucketname, bucket, endpoint, dbConn):
     print("# of assets",row[0])
 
 #########################################################################
+#Users
+def users(bucketname, bucket, endpoint, dbConn):
+  """
+  Parameters
+  ----------
+  bucketname: S3 bucket name,
+  bucket: S3 boto bucket object,
+  endpoint: RDS machine name,
+  dbConn: open connection to MySQL server
+  """
+  sql = """
+  select * from users;
+  """
+  row = datatier.retrieve_all_rows(dbConn, sql)
+  if row is None:
+    print("Database operation failed...")
+  elif row == ():
+    print("Unexpected query failure...")
+  else:
+    count=len(row)
+    for i in range(count):
+      #print(row[i])
+      print(f"User id: {row[i][0]}\n Email: {row[i][1]}\n Name: {row[i][2]}\n Folder:{row[i][3]}")
+  
+#########################################################################
 # main
 #
 print('** Welcome to PhotoApp **')
@@ -188,6 +213,9 @@ while cmd != 0:
   # TODO
   #
   #
+  elif cmd == 2:
+    users(bucketname, bucket, endpoint, dbConn)
+
   else:
     print("** Unknown command, try again...")
   #
