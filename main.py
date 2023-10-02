@@ -164,7 +164,7 @@ def assets(bucketname, bucket, endpoint, dbConn):
 
 #########################################################################
 #Download
-def download(bucketname, bucket, endpoint, dbConn):
+def download(bucketname, bucket, endpoint, dbConn, display):
   """
   Parameters
   ----------
@@ -172,6 +172,7 @@ def download(bucketname, bucket, endpoint, dbConn):
   bucket: S3 boto bucket object,
   endpoint: RDS machine name,
   dbConn: open connection to MySQL server
+  display: Parameter to control whether the function displays the image
   """
   a = input("Enter asset id\n")
   sql = f"""
@@ -188,6 +189,11 @@ def download(bucketname, bucket, endpoint, dbConn):
     bname = awsutil.download_file(bucket, row[0][1])
     os.rename(bname, row[0][0])
     print(f"Downloaded from S3 and saved as '{row[0][0]}'")
+
+    if display:
+      image = img.imread(row[0][0])
+      plt.imshow(image)
+      plt.show()
 
 
 #########################################################################
@@ -273,7 +279,11 @@ while cmd != 0:
     assets(bucketname, bucket, endpoint, dbConn)
 
   elif cmd == 4:
-    download(bucketname, bucket, endpoint, dbConn)
+    download(bucketname, bucket, endpoint, dbConn, display=False)
+
+  elif cmd == 5:
+    
+    download(bucketname, bucket, endpoint, dbConn,display=True)
 
   else:
     print("** Unknown command, try again...")
