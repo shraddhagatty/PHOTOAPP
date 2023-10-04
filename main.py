@@ -175,11 +175,11 @@ def download(bucketname, bucket, endpoint, dbConn, display):
   display: Parameter to control whether the function displays the image
   """
   a = input("Enter asset id\n")
-  sql = f"""
+  sql = """
   select assetname,bucketkey,bucketfolder from assets 
-  inner join users where assets.userid = users.userid and  assetid = {a};
+  inner join users where assets.userid = users.userid and  assetid = ?;
   """
-  row = datatier.retrieve_all_rows(dbConn, sql)
+  row = datatier.retrieve_all_rows(dbConn, sql, [a])
   if row is None:
     print("Database operation failed...")
   elif row == ():
@@ -194,6 +194,78 @@ def download(bucketname, bucket, endpoint, dbConn, display):
       image = img.imread(row[0][0])
       plt.imshow(image)
       plt.show()
+#########################################################################
+#Upload
+def upload(bucketname, bucket, endpoint, dbConn):
+  """
+  Parameters
+  ----------
+  bucketname: S3 bucket name,
+  bucket: S3 boto bucket object,
+  endpoint: RDS machine name,
+  dbConn: open connection to MySQL server
+  """
+  local_filename = input("Enter the local filename\n")
+  if not os.path.exists(local_filename):
+    print(f"local file {local_filename} does not exist")
+    sys.exit()
+
+  user_id = input("Enter the user id\n")
+
+  sql = """
+  select bucketfolder from users where userid = ?;
+  """
+  row = datatier.retrieve_all_rows(dbConn, sql, [user_id])
+  
+  if row is None:
+    print("No such User")
+  else:
+    #print(row[0][0])
+    uid= str(uuid.uuid4()) 
+    keyname = row[0][0] + '/' + uid
+
+    e= awsutil.upload_file(local_filename, bucket, keyname)
+    if (e != -1):
+        sql = """
+        insert into assets (userid,assetname,bucketkey) 
+        values( ?, '?', '?')
+        """
+        insert_result=datatier.perform_action(dbConn, sql,[user_id,uid,keyname ])
+
+        if insert_result != -1:
+            sql = """
+            select last_insert_id()
+            """
+            row = datatier.retrieve_all_rows(dbConn, sql)
+            print(f"Uploaded and stored in S3 as '{keyname}' Recorded in RDS under asset id {row[0][0]}")
+    
+#########################################################################
+#Add User
+def adduser(bucketname, bucket, endpoint, dbConn):
+  """
+  Parameters
+  ----------
+  bucketname: S3 bucket name,
+  bucket: S3 boto bucket object,
+  endpoint: RDS machine name,
+  dbConn: open connection to MySQL server
+  """
+  email= input("Enter user's email\n")
+  last_name = input("Enter users last (family) name\n")
+  first_name = input("Enetr users first (given) name\n")
+  uid= str(uuid.uuid4()) 
+
+  sql = """
+  INSERT INTO users(email, lastname, firstname, bucketfolder)
+  values(?, '?', '?','?')
+  """
+  insert_result=datatier.perform_action(dbConn, sql,[email,last_name,first_name, uid ])
+  if insert_result != -1:
+            sql = """
+            select last_insert_id()
+            """
+            row = datatier.retrieve_all_rows(dbConn, sql)
+            print(f" Recorded in RDS under user id {row[0][0]}")
 
 
 #########################################################################
@@ -284,6 +356,12 @@ while cmd != 0:
   elif cmd == 5:
     
     download(bucketname, bucket, endpoint, dbConn,display=True)
+
+  elif cmd == 6:
+    upload(bucketname, bucket, endpoint, dbConn)
+
+  elif cmd == 7:
+    adduser(bucketname, bucket, endpoint, dbConn)
 
   else:
     print("** Unknown command, try again...")
