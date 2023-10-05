@@ -251,7 +251,7 @@ def adduser(bucketname, bucket, endpoint, dbConn):
   """
   email= input("Enter user's email\n")
   last_name = input("Enter user's last (family) name\n")
-  first_name = input("Enetr user's first (given) name\n")
+  first_name = input("Enter user's first (given) name\n")
   uid= str(uuid.uuid4()) 
 
   sql = """
