@@ -99,7 +99,7 @@ def stats(bucketname, bucket, endpoint, dbConn):
   elif row == ():
     print("Unexpected query failure...")
   else:
-    print("# of users",row[0])
+    print("# of users:",row[0])
 
   sql = """
   select count(*) from assets;
@@ -110,7 +110,7 @@ def stats(bucketname, bucket, endpoint, dbConn):
   elif row == ():
     print("Unexpected query failure...")
   else:
-    print("# of assets",row[0])
+    print("# of assets:",row[0])
 
 #########################################################################
 #Users
@@ -135,7 +135,7 @@ def users(bucketname, bucket, endpoint, dbConn):
     count=len(row)
     for i in range(count):
       #print(row[i])
-      print(f"User id: {row[i][0]}\n Email: {row[i][1]}\n Name: {row[i][2]}\n Folder:{row[i][3]}")
+      print(f"User id: {row[i][0]}\n Email: {row[i][1]}\n Name: {row[i][2]}\n Folder: {row[i][3]}")
 #########################################################################
 # Assets
 # 
@@ -160,7 +160,7 @@ def assets(bucketname, bucket, endpoint, dbConn):
     count=len(row)
     for i in range(count):
       #print(row[i])
-      print(f"Asset id: {row[i][0]}\n User id: {row[i][1]}\n Original Name: {row[i][2]}\n Key Name:{row[i][3]}")
+      print(f"Asset id: {row[i][0]}\n User id: {row[i][1]}\n Original name: {row[i][2]}\n Key Name:{row[i][3]}")
 
 #########################################################################
 #Download
@@ -177,13 +177,12 @@ def download(bucketname, bucket, endpoint, dbConn, display):
   a = input("Enter asset id\n")
   sql = """
   select assetname,bucketkey,bucketfolder from assets 
-  inner join users where assets.userid = users.userid and  assetid = ?;
+  inner join users where assets.userid = users.userid and  assetid = %s;
   """
   row = datatier.retrieve_all_rows(dbConn, sql, [a])
-  if row is None:
-    print("Database operation failed...")
-  elif row == ():
-    print("Unexpected query failure...")
+  if not row:
+    print("No such asset...")
+    sys.exit()
   else:
     #print(row)
     bname = awsutil.download_file(bucket, row[0][1])
@@ -213,7 +212,7 @@ def upload(bucketname, bucket, endpoint, dbConn):
   user_id = input("Enter the user id\n")
 
   sql = """
-  select bucketfolder from users where userid = ?;
+  select bucketfolder from users where userid = %s;
   """
   row = datatier.retrieve_all_rows(dbConn, sql, [user_id])
   
@@ -228,7 +227,7 @@ def upload(bucketname, bucket, endpoint, dbConn):
     if (e != -1):
         sql = """
         insert into assets (userid,assetname,bucketkey) 
-        values( ?, '?', '?')
+        values( %s, %s, %s)
         """
         insert_result=datatier.perform_action(dbConn, sql,[user_id,uid,keyname ])
 
@@ -251,13 +250,13 @@ def adduser(bucketname, bucket, endpoint, dbConn):
   dbConn: open connection to MySQL server
   """
   email= input("Enter user's email\n")
-  last_name = input("Enter users last (family) name\n")
-  first_name = input("Enetr users first (given) name\n")
+  last_name = input("Enter user's last (family) name\n")
+  first_name = input("Enetr user's first (given) name\n")
   uid= str(uuid.uuid4()) 
 
   sql = """
   INSERT INTO users(email, lastname, firstname, bucketfolder)
-  values(?, '?', '?','?')
+  values(%s, %s, %s,%s)
   """
   insert_result=datatier.perform_action(dbConn, sql,[email,last_name,first_name, uid ])
   if insert_result != -1:
