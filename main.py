@@ -5,7 +5,7 @@
 #
 # Authors:
 #   YOUR NAME
-#   Prof. Joe Hummel (initial template)
+#   Shraddha Ravishanker
 #   Northwestern University
 #   Fall 2023
 #
@@ -114,6 +114,7 @@ def stats(bucketname, bucket, endpoint, dbConn):
 
 #########################################################################
 #Users
+#
 def users(bucketname, bucket, endpoint, dbConn):
   """
   Parameters
@@ -135,7 +136,8 @@ def users(bucketname, bucket, endpoint, dbConn):
     count=len(row)
     for i in range(count):
       #print(row[i])
-      print(f"User id: {row[i][0]}\n Email: {row[i][1]}\n Name: {row[i][2]}\n Folder: {row[i][3]}")
+      print(f"User id: {row[i][0]}\n Email: {row[i][1]}\n Name: {row[i][2]} , {row[i][3]}\n Folder: {row[i][4]}")
+
 #########################################################################
 # Assets
 # 
@@ -160,10 +162,11 @@ def assets(bucketname, bucket, endpoint, dbConn):
     count=len(row)
     for i in range(count):
       #print(row[i])
-      print(f"Asset id: {row[i][0]}\n User id: {row[i][1]}\n Original name: {row[i][2]}\n Key Name:{row[i][3]}")
+      print(f"Asset id: {row[i][0]}\n  User id: {row[i][1]}\n  Original name: {row[i][2]}\n  Key name: {row[i][3]}")
 
 #########################################################################
 #Download
+#
 def download(bucketname, bucket, endpoint, dbConn, display):
   """
   Parameters
@@ -174,7 +177,7 @@ def download(bucketname, bucket, endpoint, dbConn, display):
   dbConn: open connection to MySQL server
   display: Parameter to control whether the function displays the image
   """
-  a = input("Enter asset id\n")
+  a = input("Enter asset id>\n")
   sql = """
   select assetname,bucketkey,bucketfolder from assets 
   inner join users where assets.userid = users.userid and  assetid = %s;
@@ -182,12 +185,12 @@ def download(bucketname, bucket, endpoint, dbConn, display):
   row = datatier.retrieve_all_rows(dbConn, sql, [a])
   if not row:
     print("No such asset...")
-    sys.exit()
+    #sys.exit()
   else:
     #print(row)
     bname = awsutil.download_file(bucket, row[0][1])
     os.rename(bname, row[0][0])
-    print(f"Downloaded from S3 and saved as '{row[0][0]}'")
+    print(f"Downloaded from S3 and saved as ' {row[0][0]} '")
 
     if display:
       image = img.imread(row[0][0])
@@ -195,6 +198,7 @@ def download(bucketname, bucket, endpoint, dbConn, display):
       plt.show()
 #########################################################################
 #Upload
+#
 def upload(bucketname, bucket, endpoint, dbConn):
   """
   Parameters
@@ -206,8 +210,8 @@ def upload(bucketname, bucket, endpoint, dbConn):
   """
   local_filename = input("Enter the local filename\n")
   if not os.path.exists(local_filename):
-    print(f"local file {local_filename} does not exist")
-    sys.exit()
+    print(f"local file {local_filename} does not exist...")
+    return
 
   user_id = input("Enter the user id\n")
 
@@ -216,11 +220,11 @@ def upload(bucketname, bucket, endpoint, dbConn):
   """
   row = datatier.retrieve_all_rows(dbConn, sql, [user_id])
   
-  if row is None:
-    print("No such User")
+  if not row :
+    print("No such user...")
   else:
     #print(row[0][0])
-    uid= str(uuid.uuid4()) 
+    uid= str(uuid.uuid4()) + ".jpg"
     keyname = row[0][0] + '/' + uid
 
     e= awsutil.upload_file(local_filename, bucket, keyname)
@@ -229,17 +233,20 @@ def upload(bucketname, bucket, endpoint, dbConn):
         insert into assets (userid,assetname,bucketkey) 
         values( %s, %s, %s)
         """
-        insert_result=datatier.perform_action(dbConn, sql,[user_id,uid,keyname ])
+        insert_result=datatier.perform_action(dbConn, sql,[user_id,local_filename,keyname ])
 
         if insert_result != -1:
             sql = """
             select last_insert_id()
             """
             row = datatier.retrieve_all_rows(dbConn, sql)
-            print(f"Uploaded and stored in S3 as '{keyname}' Recorded in RDS under asset id {row[0][0]}")
+            print(f"Uploaded and stored in S3 as ' {keyname} ' Recorded in RDS under asset id {row[0][0]}")
+            assets(bucketname, bucket, endpoint, dbConn)
+
     
 #########################################################################
 #Add User
+#
 def adduser(bucketname, bucket, endpoint, dbConn):
   """
   Parameters
