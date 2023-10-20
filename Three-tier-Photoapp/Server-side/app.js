@@ -3,13 +3,13 @@
 // AWS S3 and RDS to provide clients data for building a 
 // simple photo application for photo storage and viewing.
 //
-// Project 02 for CS 310, Spring 2023.
+// Project 02 for CS 310
 //
 // Authors:
-//  YOUR NAME
+//  Shraddha Ravishanker
 //  Prof. Joe Hummel (initial template)
 //  Northwestern University
-//  Spring 2023
+//  CS 310
 //
 // References:
 // Node.js: 
