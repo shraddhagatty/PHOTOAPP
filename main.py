@@ -4,8 +4,8 @@
 # viewing.
 #
 # Authors:
-#   YOUR NAME
 #   Shraddha Ravishanker
+#   Joe Hummel
 #   Northwestern University
 #   Fall 2023
 #
