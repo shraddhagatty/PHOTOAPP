@@ -33,7 +33,7 @@ To get started with this project, follow these steps:
 1. Clone this repository to your local machine.
 
 2. Review the documentation for each project located in the respective directories:
-   - Project 01: [Two-Tier PhotoApp](Two-Tier-Photoapp/README.md)
-   - Project 02: [Three-Tier PhotoApp](Three-Tier-Photoapp/README.md)
+   - Project 01: [Two-Tier PhotoApp](Two-tier-Photoapp/README.md)
+   - Project 02: [Three-Tier PhotoApp](Three-tier-Photoapp/README.md)
 
 3. Follow the instructions in the documentation to set up and run the projects.
