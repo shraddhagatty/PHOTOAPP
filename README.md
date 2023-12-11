@@ -1,6 +1,6 @@
 # PhotoApp - A Cloud-Native Image Management Application
 
-Welcome to the PhotoApp project! This cloud-native application allows users to upload, download, and manipulate their images. In this project, we have implemented a two-tier architecture (Project 01) and a three-tier architecture (Project 02) using AWS, Python and Nodejs. This README will guide you through the key components and steps involved in both projects.
+This cloud-native application allows users to upload, download, and manipulate their images. In this project, we have implemented a two-tier architecture (Project 01) and a three-tier architecture (Project 02) using AWS, Python and Nodejs. This README will guide you through the key components and steps involved in both projects.
 
 ## Project 01 - Two-Tier PhotoApp
 
